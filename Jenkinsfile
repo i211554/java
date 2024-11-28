@@ -1,51 +1,33 @@
 pipeline {
     agent any
-    tools {
-        maven 'Maven' // Specify the Maven version configured in Jenkins
-        jdk 'Java 11' // Specify the JDK version configured in Jenkins (optional, add if needed)
+
+    parameters {
+        string(name: 'VERSION', defaultValue: '', description: 'Version to deploy on prod') // String parameter
+        choice(name: 'VERSION_CHOICE', choices: ['1.1.0', '1.2.0', '1.3.0'], description: 'Choose version') // Choice parameter
+        booleanParam(name: 'executeTests', defaultValue: true, description: 'Run the Test Stage') // Boolean parameter
     }
+
     environment {
-        // Variables defined here can be used by any stage
-        NEW_VERSION = '1.3.0' // Example of an environment variable
+        NEW_VERSION = '1.3.0' // Example variable accessible to all stages
     }
+
     stages {
         stage('Build') {
             steps {
-                echo 'Building Project'
-                // Using environment variable
-                echo "Building version ${NEW_VERSION}"
-                // Maven install command
-                sh 'mvn install'
+                echo "Building Project for Version: ${params.VERSION_CHOICE}"
             }
         }
+
         stage('Test') {
             when {
-                branch 'main' // Run this stage only on the 'main' branch
+                expression {
+                    // Check the 'executeTests' parameter
+                    params.executeTests
+                }
             }
             steps {
-                echo 'Running Tests'
-                // Maven test command
-                sh 'mvn test'
+                echo 'Testing Project...'
             }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying Project'
-                echo "Deploying version ${NEW_VERSION}"
-                // Maven deploy command (example)
-                sh 'mvn deploy'
-            }
-        }
-    }
-    post {
-        always {
-            echo 'Pipeline execution completed'
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
