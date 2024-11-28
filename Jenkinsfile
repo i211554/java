@@ -8,6 +8,12 @@ pipeline {
             }
         }
         stage('Test') {
+            when {
+                expression {
+                    // Replace with your condition (e.g., only run on a specific branch)
+                    return env.BRANCH_NAME == 'main'
+                }
+            }
             steps {
                 echo 'Testing..'
                 // Here you can define commands for your tests
