@@ -1,40 +1,39 @@
 pipeline {
     agent any
+    environment {
+        // Define custom environment variables
+        TOOL_VERSION = '1.2.3'   // Example: a specific tool version
+        DEPLOY_ENV = 'production' // Deployment environment
+    }
     stages {
         stage('Build') {
             steps {
-                echo 'Building..'
-                // Here you can define commands for your build
+                echo "Building with tool version ${TOOL_VERSION}"
+                // Use the TOOL_VERSION environment variable in build commands
+                sh 'echo Building with version $TOOL_VERSION'
             }
         }
         stage('Test') {
-            when {
-                expression {
-                    // Replace with your condition (e.g., only run on a specific branch)
-                    return env.BRANCH_NAME == 'main'
-                }
-            }
             steps {
-                echo 'Testing..'
-                // Here you can define commands for your tests
+                echo "Testing in ${DEPLOY_ENV} environment"
+                // Use the DEPLOY_ENV environment variable in test commands
+                sh 'echo Running tests in $DEPLOY_ENV'
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
-                // Here you can define commands for your deployment
+                echo "Deploying to ${DEPLOY_ENV}"
+                // Use the environment variables during deployment
+                sh 'echo Deploying to $DEPLOY_ENV using version $TOOL_VERSION'
             }
         }
     }
     post {
-        always {
-            echo 'Post build condition running'
+        success {
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Post Action if Build Failed'
-        }
-        success {
-            echo 'Post Action if Build Succeeded'
+            echo 'Pipeline failed!'
         }
     }
 }
