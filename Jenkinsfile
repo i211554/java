@@ -1,36 +1,48 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven' // Specify the Maven version configured in Jenkins
+        jdk 'Java 11' // Specify the JDK version configured in Jenkins (optional, add if needed)
+    }
     environment {
-        // Define custom environment variables
-        TOOL_VERSION = '1.2.3'   // Example: a specific tool version
-        DEPLOY_ENV = 'production' // Deployment environment
+        // Variables defined here can be used by any stage
+        NEW_VERSION = '1.3.0' // Example of an environment variable
     }
     stages {
         stage('Build') {
             steps {
-                echo "Building with tool version ${TOOL_VERSION}"
-                // Use the TOOL_VERSION environment variable in build commands
-                sh 'echo Building with version $TOOL_VERSION'
+                echo 'Building Project'
+                // Using environment variable
+                echo "Building version ${NEW_VERSION}"
+                // Maven install command
+                sh 'mvn install'
             }
         }
         stage('Test') {
+            when {
+                branch 'main' // Run this stage only on the 'main' branch
+            }
             steps {
-                echo "Testing in ${DEPLOY_ENV} environment"
-                // Use the DEPLOY_ENV environment variable in test commands
-                sh 'echo Running tests in $DEPLOY_ENV'
+                echo 'Running Tests'
+                // Maven test command
+                sh 'mvn test'
             }
         }
         stage('Deploy') {
             steps {
-                echo "Deploying to ${DEPLOY_ENV}"
-                // Use the environment variables during deployment
-                sh 'echo Deploying to $DEPLOY_ENV using version $TOOL_VERSION'
+                echo 'Deploying Project'
+                echo "Deploying version ${NEW_VERSION}"
+                // Maven deploy command (example)
+                sh 'mvn deploy'
             }
         }
     }
     post {
+        always {
+            echo 'Pipeline execution completed'
+        }
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline succeeded!'
         }
         failure {
             echo 'Pipeline failed!'
